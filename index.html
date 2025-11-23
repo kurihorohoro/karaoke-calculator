@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カラオケ得点予想ツール</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --error-color: #dc3545;
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+        }
+
+        body { font-family: "Helvetica Neue", Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background-color: var(--bg-color); color: var(--text-color); }
+        h1 { text-align: center; color: #444; margin-bottom: 30px; }
+        .container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        .mode-switch { display: flex; justify-content: center; margin-bottom: 25px; border-bottom: 2px solid #eee; }
+        .mode-btn { padding: 12px 25px; cursor: pointer; border: none; background: none; font-size: 16px; font-weight: bold; color: #999; transition: color 0.3s; }
+        .mode-btn.active { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); margin-bottom: -2px; }
+        .mode-btn:hover:not(.active) { color: #666; }
+
+        .form-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .form-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .description-content { line-height: 1.6; color: #555; }
+        .description-content h3 { color: #333; border-left: 4px solid var(--primary-color); padding-left: 10px; margin-top: 20px; }
+        
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        
+        label { font-size: 13px; margin-bottom: 6px; font-weight: 600; color: #555; }
+        input[type="number"] { 
+            padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; transition: border-color 0.2s; 
+        }
+        input[type="number"]:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+
+        .action-area { margin-top: 35px; text-align: center; }
+        button.calc-btn { 
+            background-color: var(--primary-color); color: white; border: none; padding: 14px 50px; 
+            font-size: 18px; font-weight: bold; border-radius: 50px; cursor: pointer; 
+            transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,123,255,0.2);
+        }
+        button.calc-btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 8px rgba(0,123,255,0.3); }
+        button.calc-btn:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        #result-box { 
+            margin-top: 25px; 
+            padding: 15px;
+            border-radius: 8px; 
+            background: #f8f9fa; 
+            border: 1px solid #eee; 
+            display: none;
+            text-align: center;
+        }
+        #result-box.visible { display: block; }
+        .score-display { 
+            font-size: 38px;
+            font-weight: 800; 
+            color: #ffcc00; 
+            line-height: 1; 
+            text-shadow: 0 2px 2px rgba(255, 255, 0, 0.6);
+        }
+        .score-unit {
+            font-size: 0.5em;
+            color: #888;
+            text-shadow: none;
+        }
+        .error-msg { color: var(--error-color); font-weight: bold; background: #fff5f5; padding: 10px; border-radius: 4px; border: 1px solid #ffc9c9; display: inline-block; }
+        
+        .spinner {
+            display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); 
+            border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; margin-right: 10px; vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>カラオケ得点予想ツール (α)</h1>
+
+    <div class="mode-switch">
+        <button class="mode-btn active" onclick="ui.switchTab('input')">入力</button>
+        <button class="mode-btn" onclick="ui.switchTab('description')">説明</button>
+    </div>
+
+    <div id="input-form" class="form-section active">
+        <p style="font-size:0.9em; color:#666; margin-bottom:15px;">各項目を入力してください。</p>
+        <div class="input-grid">
+            <div class="form-group">
+                <label>音程<span style="color: var(--error-color);"> *</span></label>
+                <input type="number" id="s_pitch" placeholder="80-100" min="80" max="100" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>安定性<span style="color: var(--error-color);"> *</span></label>
+                <input type="number" id="s_stability" placeholder="80-100" min="80" max="100" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>表現力<span style="color: var(--error-color);"> *</span></label>
+                <input type="number" id="s_expression" placeholder="80-100" min="80" max="100" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>リズム<span style="color: var(--error-color);"> *</span></label>
+                <input type="number" id="s_rhythm" placeholder="80-100" min="80" max="100" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>ビブ&ロング<span style="color: var(--error-color);"> *</span></label>
+                <input type="number" id="s_vib_long" placeholder="80-100" min="80" max="100" step="0.1">
+            </div>
+        </div>
+        
+        <div class="action-area">
+            <button id="calc-btn" class="calc-btn" onclick="app.handleCalculate()">
+                <span id="btn-text">計算する</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="description-form" class="form-section">
+        <div class="description-content">
+            <h3>このツールについて</h3>
+            <p>某Aiカラオケ採点における，主要5項目から総合得点を予測するためのツールです．</p>
+        </div>
+    </div>
+    
+    <div id="result-box">
+        <div id="result-content"></div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+
+</body>
+</html>
