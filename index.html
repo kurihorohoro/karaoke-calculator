@@ -17,24 +17,20 @@
         h1 { text-align: center; color: #444; margin-bottom: 30px; }
         .container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
-        /* タブ切り替え */
         .mode-switch { display: flex; justify-content: center; margin-bottom: 25px; border-bottom: 2px solid #eee; }
         .mode-btn { padding: 12px 25px; cursor: pointer; border: none; background: none; font-size: 16px; font-weight: bold; color: #999; transition: color 0.3s; }
         .mode-btn.active { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); margin-bottom: -2px; }
         .mode-btn:hover:not(.active) { color: #666; }
 
-        /* フォーム表示制御 */
         .form-section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .form-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 説明タブ用のスタイル */
         .description-content { line-height: 1.6; color: #555; }
         .description-content h3 { color: #333; border-left: 4px solid var(--primary-color); padding-left: 10px; margin-top: 20px; }
         .description-content ul { padding-left: 20px; }
         .description-content li { margin-bottom: 8px; }
 
-        /* グリッドレイアウト */
         .input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
         .form-group { display: flex; flex-direction: column; }
         
@@ -44,10 +40,8 @@
         }
         input[type="number"]:focus, select:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
         
-        /* スタブ要素 */
         .input-grid .form-group.stub input { background: #f9f9f9; border-color: #eee; cursor: not-allowed; }
 
-        /* ラジオボタングループ */
         .radio-group-container { 
             background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;
         }
@@ -56,7 +50,6 @@
         .radio-label { display: inline-flex; align-items: center; margin-right: 15px; font-size: 0.9em; cursor: pointer; }
         .radio-label input { margin-right: 5px; }
 
-        /* アクションエリア */
         .action-area { margin-top: 35px; text-align: center; }
         button.calc-btn { 
             background-color: var(--primary-color); color: white; border: none; padding: 14px 50px; 
@@ -72,7 +65,6 @@
         }
         button.clear-btn:hover { background-color: #5a6268; transform: translateY(-1px); }
         
-        /* 結果表示 */
         #result-box { 
             margin-top: 25px; padding: 20px; border-radius: 8px; background: #f8f9fa; 
             border: 1px solid #eee; min-height: 60px; display: none;
