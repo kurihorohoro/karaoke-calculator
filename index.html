@@ -17,28 +17,46 @@
         h1 { text-align: center; color: #444; margin-bottom: 30px; }
         .container { background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
+        /* タブ切り替え */
         .mode-switch { display: flex; justify-content: center; margin-bottom: 25px; border-bottom: 2px solid #eee; }
         .mode-btn { padding: 12px 25px; cursor: pointer; border: none; background: none; font-size: 16px; font-weight: bold; color: #999; transition: color 0.3s; }
         .mode-btn.active { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); margin-bottom: -2px; }
         .mode-btn:hover:not(.active) { color: #666; }
 
+        /* フォーム表示制御 */
         .form-section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .form-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* 説明タブ用のスタイル */
         .description-content { line-height: 1.6; color: #555; }
         .description-content h3 { color: #333; border-left: 4px solid var(--primary-color); padding-left: 10px; margin-top: 20px; }
-        
+        .description-content ul { padding-left: 20px; }
+        .description-content li { margin-bottom: 8px; }
+
+        /* グリッドレイアウト */
         .input-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
         .form-group { display: flex; flex-direction: column; }
         
         label { font-size: 13px; margin-bottom: 6px; font-weight: 600; color: #555; }
-        /* Select用のスタイルを追加 */
         input[type="number"], select { 
             padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; transition: border-color 0.2s; 
         }
         input[type="number"]:focus, select:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(0,123,255,0.1); }
+        
+        /* スタブ要素 */
+        .input-grid .form-group.stub input { background: #f9f9f9; border-color: #eee; cursor: not-allowed; }
 
+        /* ラジオボタングループ */
+        .radio-group-container { 
+            background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e9ecef;
+        }
+        .radio-section { margin-bottom: 10px; }
+        .radio-section strong { display: block; margin-bottom: 5px; font-size: 0.9em; color: #495057; }
+        .radio-label { display: inline-flex; align-items: center; margin-right: 15px; font-size: 0.9em; cursor: pointer; }
+        .radio-label input { margin-right: 5px; }
+
+        /* アクションエリア */
         .action-area { margin-top: 35px; text-align: center; }
         button.calc-btn { 
             background-color: var(--primary-color); color: white; border: none; padding: 14px 50px; 
@@ -47,15 +65,17 @@
         }
         button.calc-btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 8px rgba(0,123,255,0.3); }
         button.calc-btn:disabled { background-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        button.clear-btn { 
+            background-color: #6c757d; color: white; border: none; padding: 14px 30px; 
+            font-size: 18px; font-weight: bold; border-radius: 50px; cursor: pointer; 
+            transition: all 0.2s; margin-left: 10px;
+        }
+        button.clear-btn:hover { background-color: #5a6268; transform: translateY(-1px); }
         
+        /* 結果表示 */
         #result-box { 
-            margin-top: 25px; 
-            padding: 15px;
-            border-radius: 8px; 
-            background: #f8f9fa; 
-            border: 1px solid #eee; 
-            display: none;
-            text-align: center;
+            margin-top: 25px; padding: 20px; border-radius: 8px; background: #f8f9fa; 
+            border: 1px solid #eee; min-height: 60px; display: none;
         }
         #result-box.visible { display: block; }
         .score-display { 
@@ -70,9 +90,7 @@
             color: #888;
             text-shadow: none;
         }
-        /* 範囲表示用のスタイルを追加 */
         .score-range { color: #666; font-size: 14px; margin-top: 10px; }
-        
         .error-msg { color: var(--error-color); font-weight: bold; background: #fff5f5; padding: 10px; border-radius: 4px; border: 1px solid #ffc9c9; display: inline-block; }
         
         .spinner {
@@ -89,55 +107,102 @@
     <h1>カラオケ得点予想ツール (α)</h1>
 
     <div class="mode-switch">
-        <button class="mode-btn active" onclick="ui.switchTab('input')">入力</button>
-        <button class="mode-btn" onclick="ui.switchTab('description')">説明</button>
+        <button class="mode-btn active" onclick="ui.switchMode('simple')">簡単モード</button>
+        <button class="mode-btn" onclick="ui.switchMode('advanced')">上級モード</button>
+        <button class="mode-btn" onclick="ui.switchMode('description')">説明</button>
     </div>
 
-    <div id="input-form" class="form-section active">
-        <p style="font-size:0.9em; color:#666; margin-bottom:15px;">各項目を入力してください。</p>
+    <div id="simple-form" class="form-section active">
+        <p style="font-size:0.9em; color:#666; margin-bottom:15px;">各項目を入力してください．</p>
         <div class="input-grid">
             <div class="form-group">
                 <label>音程<span style="color: var(--error-color);"> *</span></label>
-                <input type="number" id="s_pitch" placeholder="80-100" min="80" max="100" step="0.1">
+                <input type="number" id="s_pitch" placeholder="0-100" min="0" max="100" step="0.1">
             </div>
             <div class="form-group">
                 <label>安定性<span style="color: var(--error-color);"> *</span></label>
-                <input type="number" id="s_stability" placeholder="80-100" min="80" max="100" step="0.1">
+                <input type="number" id="s_stability" placeholder="0-100" min="0" max="100" step="0.1">
             </div>
             <div class="form-group">
                 <label>表現力<span style="color: var(--error-color);"> *</span></label>
-                <input type="number" id="s_expression" placeholder="80-100" min="80" max="100" step="0.1">
+                <input type="number" id="s_expression" placeholder="0-100" min="0" max="100" step="0.1">
             </div>
             <div class="form-group">
                 <label>リズム<span style="color: var(--error-color);"> *</span></label>
-                <input type="number" id="s_rhythm" placeholder="80-100" min="80" max="100" step="0.1">
+                <input type="number" id="s_rhythm" placeholder="0-100" min="0" max="100" step="0.1">
             </div>
             <div class="form-group">
                 <label>ビブ&ロング<span style="color: var(--error-color);"> *</span></label>
-                <input type="number" id="s_vib_long" placeholder="80-100" min="80" max="100" step="0.1">
+                <input type="number" id="s_vib_long" placeholder="0-100" min="0" max="100" step="0.1">
             </div>
-
+            
+            <div class="form-group">
+                <label>響き</label>
+                <input type="number" id="s_hibiki" placeholder="0-100000" min="0" max="100000" step="0.1">
+            </div>
+            <div class="form-group">
+                <label>倍音</label>
+                <input type="number" id="s_overtone" placeholder="0-2500" min="0" max="2500" step="0.1">
+            </div>
+            
             <div class="form-group" style="grid-column: 1 / -1;">
                 <label>詳細出力モード</label>
                 <select id="s_verbose" onchange="ui.updateVerboseConstraints()">
                     <option value="0">OFF</option>
-                    <option value="19">精度レンジを表示 (整数のみ)</option>
+                    <option value="19">精度レンジを表示 (整数入力のみ)</option>
+                    <option value="35">三森範囲を表示</option>
+                    <option value="52">全要素変動解析 (整数入力のみ)</option>
                 </select>
             </div>
         </div>
+    </div>
+
+    <div id="advanced-form" class="form-section">
+        <p style="font-size:0.9em; color:#666; margin-bottom:15px;">詳細パラメータ構成</p>
         
-        <div class="action-area">
-            <button id="calc-btn" class="calc-btn" onclick="app.handleCalculate()">
-                <span id="btn-text">計算する</span>
-            </button>
+        <div class="radio-group-container">
+            <div class="input-grid">
+                <div class="radio-section">
+                    <strong>リズムの入力:</strong>
+                    <label class="radio-label"><input type="radio" name="adv_choice_rhythm" value="timing" checked> タイミング</label>
+                    <label class="radio-label"><input type="radio" name="adv_choice_rhythm" value="rhythm"> 得点</label>
+                </div>
+                <div class="radio-section">
+                    <strong>安定性の入力:</strong>
+                    <label class="radio-label"><input type="radio" name="adv_choice_stability" value="stability_raw" checked> 内部値</label>
+                    <label class="radio-label"><input type="radio" name="adv_choice_stability" value="stability"> 得点</label>
+                </div>
+                <div class="radio-section">
+                    <strong>抑揚の入力:</strong>
+                    <label class="radio-label"><input type="radio" name="adv_choice_expression" value="intonation_raw" checked> 内部値</label>
+                    <label class="radio-label"><input type="radio" name="adv_choice_expression" value="intonation"> 得点</label>
+                </div>
+                <div class="radio-section">
+                    <strong>ビブ&ロングの入力:</strong>
+                    <label class="radio-label"><input type="radio" name="adv_choice_vib_long" value="raw" checked> それぞれの上手さ</label>
+                    <label class="radio-label"><input type="radio" name="adv_choice_vib_long" value="vib_long"> ビブ&ロング</label>
+                </div>
+            </div>
         </div>
+
+        <div class="input-grid" id="advanced-inputs">
+            </div>
     </div>
 
     <div id="description-form" class="form-section">
         <div class="description-content">
             <h3>このツールについて</h3>
-            <p>某カラオケAi採点における，主要5項目から総合得点を予測するためのツールです．</p>
+            <p>某Aiカラオケ採点における，各パラメタから総合得点を予測するための非公式のツールです．</p>
+            <h3></h3>
+
         </div>
+    </div>
+
+    <div class="action-area">
+        <button id="calc-btn" class="calc-btn" onclick="app.handleCalculate()">
+            <span id="btn-text">計算する</span>
+        </button>
+        <button id="clear-btn" class="clear-btn" onclick="ui.clearForm()">全消去</button>
     </div>
     
     <div id="result-box">
@@ -146,6 +211,5 @@
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
